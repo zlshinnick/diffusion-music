@@ -12,7 +12,7 @@ from riffusion.util import image_util
 
 def generate_with_input_audio():
     # Load audio file
-    audio_path = "tril.mp3"
+    audio_path = "trial.mp3"
     segment = AudioSegment.from_file(audio_path)
 
     # Creation of audio to spectrogram Converter
