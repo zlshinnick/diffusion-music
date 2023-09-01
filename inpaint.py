@@ -76,7 +76,7 @@ def gaussian_paint(image: Image.Image, fade_width: int = 50) -> (Image.Image, Im
 
     return Image.fromarray(image_np, mode='L'), Image.fromarray(mask_np, mode='L')
 
-audio_path = "trial.mp3"
+audio_path = "sample_audios/piano_for_extend.mp3"
 segment = AudioSegment.from_file(audio_path)
 
 params = SpectrogramParams()
@@ -88,8 +88,8 @@ print(spectrogram_image.size)
 noisy_spectrogram, mask_image = gaussian_paint(spectrogram_image)
 
 
-noisy_spectrogram_path_str = "seed_images/noisy_spectrogram.png"
-mask_image_path_str = "seed_images/mask.png"
+noisy_spectrogram_path_str = "outputs/noisy_spectrogram.png"
+mask_image_path_str = "outputs/mask.png"
 noisy_spectrogram.save(noisy_spectrogram_path_str)
 mask_image.save(mask_image_path_str)
 
@@ -120,10 +120,10 @@ if response.status_code == 200:
     generated_audio = output['audio']
     generated_image = output['image']
     
-    with open('generated_audio_extended.mp3', 'wb') as audio_file:
+    with open('outputs/generated.mp3', 'wb') as audio_file:
         audio_file.write(base64.b64decode(generated_audio.split(',')[1]))
     
-    with open('generated_image_extended.jpg', 'wb') as image_file:
+    with open('outputs/generated.jpg', 'wb') as image_file:
         image_file.write(base64.b64decode(generated_image.split(',')[1]))
     
     print("Generated extended audio and image saved successfully.")
