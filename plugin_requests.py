@@ -2,6 +2,8 @@ import sys
 
 from scripts.generate import generate_without_input_audio as riff_generate
 # from scripts.generate import generate_with_input_audio as riff_replace
+# from scripts.inpaint import x as riff_extend
+# from scripts.inpaint import y as riff_infill
 
 #checking for correct number of arguments
 if len(sys.argv) != 5:
@@ -17,7 +19,7 @@ path = sys.argv[4]
 #use model to generate clip
 newTrackPath = ""
 
-if action == "Generate": riff_generate(prompt, random)
+if action == "Generate": newTrackPath = riff_generate(prompt, random)
     
 elif action == "Replace": pass #riff_replace(prompt, random, path)
     

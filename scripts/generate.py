@@ -4,6 +4,7 @@ from PIL import Image
 import requests
 from pathlib import Path
 import base64
+import os
 
 from riffusion.spectrogram_converter import SpectrogramConverter
 from riffusion.spectrogram_params import SpectrogramParams
@@ -61,25 +62,26 @@ def generate_without_input_audio(prompt: str, random: str):
             "denoising": float(random),
         },
         "alpha": 0.5,
-        "num_inference_steps": 5,
+        "num_inference_steps": 3,
     }
 
     response = requests.post("http://127.0.0.1:3013/run_inference/", json=data)
-    handle_response(response, with_image=False)
+    newTrackPath = handle_response(response, with_image=False)
 
-#to complete
+    return newTrackPath
+
 def handle_response(response, with_image=True):
     if response.status_code == 200:
         output = response.json()
         generated_audio = output['audio']
-        
-        # Save generated audio 
-        #!!! ensure saved in correct outpute
-        with open('generated_clip.mp3', 'wb') as audio_file:
+
+        # Save generated audio in correct location
+        newTrackPath = os.getcwd() + "/outputs/generated_clip.mp3"
+        with open(newTrackPath, 'wb') as audio_file:
             audio_file.write(base64.b64decode(generated_audio.split(',')[1]))
 
-        #!!! change to get users specific path
-        path = "/Users/willsaliba/Documents/Topics/TopicsCode/RiffusionModel/generated_clip.mp3"
-        print(path)
+        return newTrackPath
+    
     else:
         print(f"Error: {response.text}")
+        return "error"

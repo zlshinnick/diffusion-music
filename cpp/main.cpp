@@ -5,7 +5,19 @@
 #include <string>
 #include <array>
 #include <memory>
+#include <unistd.h>
 using namespace std;
+
+//getting user specific directory to execute other files
+string get_current_directory() {
+    char buffer[FILENAME_MAX];
+    if (getcwd(buffer, sizeof(buffer))) {
+        return string(buffer);
+    } else {
+        perror("Error obtaining current directory");
+        return "";
+    }
+}
 
 string get_result_from_model(const char* cmd) {
     
@@ -26,22 +38,21 @@ string get_result_from_model(const char* cmd) {
 
 int main() {
 
-    string prompt = "Herbie Rapping";
+    string prompt = "mozart piano";
     string action = "Generate";
     string randomness = "70";
     string filePath = "/Users/willsaliba/Documents/piano.wav";
     printf("Request Generated\n\n");
 
     //command to execute python code with args
-    //!!! change to get custom filepath 
-    string cmd = "python3 /Users/willsaliba/Documents/Topics/TopicsCode/RiffusionModel/plugin_requests.py \"" 
-        + prompt + "\" \"" + action + "\" " + randomness + " \"" + filePath + "\"";
+    string currentDir = get_current_directory();
+    string cmd = "python3 " + currentDir + "/plugin_requests.py \"" + prompt + "\" \"" + action + "\" " + randomness + " \"" + filePath + "\"";
 
     //perform command & store result
-    string newTrackPath = get_result_from_model(cmd.c_str());;
+    string newTrackPath = get_result_from_model(cmd.c_str());
 
     //print response
-    cout << "Response: " << newTrackPath;
+    cout << "Response: " << newTrackPath << endl;
 
     return 0;
 }

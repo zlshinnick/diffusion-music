@@ -1,4 +1,18 @@
-step 1: run "python3 setup.py"
+???
+
+//setup virtual python environment
+conda create --name riffusion python=3.9
+conda activate riffusion
+
+//install python dependencies
+python -m pip install -r requirements_all.txt
+
+//accept other audio formats
+brew install ffmpeg
+
+???
+
+step 1: run "python3 setup.py install"
 
 step 2: run "python3 riffusion/server.py"
 
@@ -26,3 +40,5 @@ inpaint can:
 generate can:
     - text to audio
     - text & audtio to audio
+
+
