@@ -10,9 +10,9 @@ from riffusion.spectrogram_params import SpectrogramParams
 from riffusion.spectrogram_image_converter import SpectrogramImageConverter
 from riffusion.util import image_util
 
-def generate_with_input_audio():
+def generate_with_input_audio(prompt: str, random: str, path: str):
     # Load audio file
-    audio_path = "trial.mp3"
+    audio_path = path
     segment = AudioSegment.from_file(audio_path)
 
     # Creation of audio to spectrogram Converter
@@ -31,14 +31,14 @@ def generate_with_input_audio():
 
     data = {
         "start": {
-            "prompt": "minimal emotional atmospheric synth techno beat jungle drum bass beat drop",
+            "prompt": prompt,
             "seed": 42,
-            "denoising": 0.75,
+            "denoising": random,
         },
         "end": {
-            "prompt": "minimal emotional atmospheric synth techno beat jungle drum bass beat drop",
+            "prompt": prompt,
             "seed": 43,
-            "denoising": 0.75,
+            "denoising": random,
         },
         "alpha": 0.5,
         "num_inference_steps": 50,
@@ -46,41 +46,40 @@ def generate_with_input_audio():
     }
 
     response = requests.post("http://127.0.0.1:3013/run_inference/", json=data)
-    
     handle_response(response)
 
-def generate_without_input_audio():
+def generate_without_input_audio(prompt: str, random: str):
     data = {
         "start": {
-            "prompt": "minimal emotional atmospheric synth techno beat jungle drum bass beat drop",
+            "prompt": prompt,
             "seed": 42,
-            "denoising": 0.75,
+            "denoising": float(random),
         },
         "end": {
-            "prompt": "minimal emotional atmospheric synth techno beat jungle drum bass beat drop",
+            "prompt": prompt,
             "seed": 43,
-            "denoising": 0.75,
+            "denoising": float(random),
         },
         "alpha": 0.5,
-        "num_inference_steps": 50,
+        "num_inference_steps": 5,
     }
 
     response = requests.post("http://127.0.0.1:3013/run_inference/", json=data)
-    
     handle_response(response, with_image=False)
 
+#to complete
 def handle_response(response, with_image=True):
     if response.status_code == 200:
         output = response.json()
         generated_audio = output['audio']
         
-        # Save generated audio
-        with open('generated.mp3', 'wb') as audio_file:
+        # Save generated audio 
+        #!!! ensure saved in correct outpute
+        with open('generated_clip.mp3', 'wb') as audio_file:
             audio_file.write(base64.b64decode(generated_audio.split(',')[1]))
 
-
-        print("Generation completed successfully.")
+        #!!! change to get users specific path
+        path = "/Users/willsaliba/Documents/Topics/TopicsCode/RiffusionModel/generated_clip.mp3"
+        print(path)
     else:
         print(f"Error: {response.text}")
-
-generate_without_input_audio()
