@@ -42,3 +42,18 @@ generate can:
     - text & audtio to audio
 
 
+---- TO PERFORM REQUEST TEST ---
+
+adjust arguments to your liking in main.cpp
+
+in terminal 1 run:
+    conda activate riffusion
+    python3 setup.py install
+    python3 riffusion/server.py
+
+then create new terminal & run:
+    conda activate riffusion
+    clang++ cpp/main.cpp -o 1
+    ./1
+
+this will override generated_clip.mp3 amnd return the user specifc path file to cpp file
