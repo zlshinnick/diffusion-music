@@ -1,9 +1,10 @@
-import sys
+import os
+#!!! have to virtual environment path
+os.environ['PATH'] += ":/Users/willsaliba/opt/anaconda3/envs/riffusion/bin"
 
+import sys
 from scripts.generate import generate_without_input_audio as riff_generate
-# from scripts.generate import generate_with_input_audio as riff_replace
-# from scripts.inpaint import x as riff_extend
-# from scripts.inpaint import y as riff_infill
+#replace
 
 #checking for correct number of arguments
 if len(sys.argv) != 5:
@@ -11,10 +12,10 @@ if len(sys.argv) != 5:
     sys.exit(1)
 
 #extracting arguments from command line
-prompt = sys.argv[1]
-action = sys.argv[2]
-random = sys.argv[3]
-path = sys.argv[4]
+prompt = sys.argv[1].strip('"')
+action = sys.argv[2].strip('"')
+random = sys.argv[3].strip('"')
+path = sys.argv[4].strip('"')
 
 #use model to generate clip
 newTrackPath = ""
@@ -27,5 +28,8 @@ elif action == "Extend": pass #riff_extend(prompt, random, path, time, side)
     
 elif action == "Infill": pass #riff_infill(prompt, random, path1, path2?, start?, end?)
 
-#print result so c++ can capture it
-print(newTrackPath)
+#print result so plugin can capture it
+if newTrackPath == "":
+    print("Reached End But Failed")
+else:
+    print(newTrackPath)

@@ -83,7 +83,6 @@ params = SpectrogramParams()
 converter = SpectrogramImageConverter(params=params)
 
 spectrogram_image = converter.spectrogram_image_from_audio(segment)
-print(spectrogram_image.size)
 
 noisy_spectrogram, mask_image = gaussian_paint(spectrogram_image)
 

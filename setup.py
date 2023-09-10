@@ -2,11 +2,14 @@ from pathlib import Path
 
 from setuptools import find_packages, setup
 
-# Load the version from file
-__version__ = Path("VERSION").read_text().strip()
+# Get the directory where setup.py is located
+current_directory = Path(__file__).parent
 
-# Load packages
-packages = Path("requirements.txt").read_text().splitlines()
+# Load the version from file using absolute path
+__version__ = (current_directory / "VERSION").read_text().strip()
+
+# Load packages using absolute path
+packages = (current_directory / "requirements.txt").read_text().splitlines()
 
 setup(
     name="riffusion",
