@@ -6,6 +6,7 @@ from pathlib import Path
 import requests
 import json
 import base64
+import random
 
 from riffusion.spectrogram_converter import SpectrogramConverter
 from riffusion.spectrogram_params import SpectrogramParams
@@ -83,6 +84,7 @@ params = SpectrogramParams()
 converter = SpectrogramImageConverter(params=params)
 
 spectrogram_image = converter.spectrogram_image_from_audio(segment)
+print(spectrogram_image.size)
 
 noisy_spectrogram, mask_image = gaussian_paint(spectrogram_image)
 
@@ -98,12 +100,12 @@ mask_image_path = Path(mask_image_path_str)
 data = {
     "start": {
         "prompt": "upbeat classical piano",
-        "seed": 50,
+        "seed": random.randint(1, 100),
         "denoising": 1,
     },
     "end": {
         "prompt": "upbeat classical piano",
-        "seed": 43,
+        "seed": random.randint(1, 100),
         "denoising": 1,
     },
     "alpha": 0.5,
