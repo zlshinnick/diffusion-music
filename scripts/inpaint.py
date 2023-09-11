@@ -159,7 +159,8 @@ def run_inference_and_save_outputs(spectrogram_image: Image.Image, prompt: str, 
     else:
         print(f"Error: {response.text}")
 
-def riff_extend(prompt, path, time, side):
+def riff_extend(prompt: str, path: str, time: str, side: str):
+    time = int(time)
     segment = AudioSegment.from_file(path)
     params = SpectrogramParams()
     converter = SpectrogramImageConverter(params=params)
@@ -169,7 +170,8 @@ def riff_extend(prompt, path, time, side):
 
     run_inference_and_save_outputs(extended_spectrogram, prompt)
 
-def riff_infill(prompt: str, left_audio: str, right_audio: str, time: int):
+def riff_infill(prompt: str, left_audio: str, right_audio: str, time: str):
+    time = int(time)
     # Load audio segments
     left_segment = AudioSegment.from_file(left_audio)
     right_segment = AudioSegment.from_file(right_audio)
@@ -189,6 +191,8 @@ def riff_infill(prompt: str, left_audio: str, right_audio: str, time: int):
     
     # Run inference and save outputs
     run_inference_and_save_outputs(infilled_spectrogram, prompt)
+
+riff_infill("piano","sample_audios/piano.mp3","sample_audios/piano.mp3", "1")
 
 """
 Script to run these @Will
