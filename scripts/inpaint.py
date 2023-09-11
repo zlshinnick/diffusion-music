@@ -77,56 +77,125 @@ def gaussian_paint(image: Image.Image, fade_width: int = 50) -> (Image.Image, Im
 
     return Image.fromarray(image_np, mode='L'), Image.fromarray(mask_np, mode='L')
 
-audio_path = "sample_audios/piano_for_extend.mp3"
-segment = AudioSegment.from_file(audio_path)
+def calculate_pixels_to_extend(time_to_extend, rate=102.4):
+    return round(time_to_extend * rate)
 
-params = SpectrogramParams()
-converter = SpectrogramImageConverter(params=params)
-
-spectrogram_image = converter.spectrogram_image_from_audio(segment)
-print(spectrogram_image.size)
-
-noisy_spectrogram, mask_image = gaussian_paint(spectrogram_image)
-
-
-noisy_spectrogram_path_str = "outputs/noisy_spectrogram.png"
-mask_image_path_str = "outputs/mask.png"
-noisy_spectrogram.save(noisy_spectrogram_path_str)
-mask_image.save(mask_image_path_str)
-
-spectrogram_image_path = Path(noisy_spectrogram_path_str)
-mask_image_path = Path(mask_image_path_str)
-
-data = {
-    "start": {
-        "prompt": "upbeat classical piano",
-        "seed": random.randint(1, 100),
-        "denoising": 1,
-    },
-    "end": {
-        "prompt": "upbeat classical piano",
-        "seed": random.randint(1, 100),
-        "denoising": 1,
-    },
-    "alpha": 0.5,
-    "num_inference_steps": 100,
-    "seed_image_id": spectrogram_image_path.stem,
-    "mask_image_id": mask_image_path.stem
-}
-
-response = requests.post("http://127.0.0.1:3013/run_inference/", json=data)
-
-if response.status_code == 200:
-    output = response.json()
-    generated_audio = output['audio']
-    generated_image = output['image']
+def extend_spectrogram(image: Image.Image, time: int, side: str) -> Image.Image:
+    """
+    Extend the spectrogram by adding white space on the specified side.
+    """
+    pixels_to_extend = calculate_pixels_to_extend(time) # Converting time to pixels
+    width, height = image.size
+    new_width = width + pixels_to_extend  
+    extended_image = Image.new('RGB', (new_width, height), 'white')
     
-    with open('outputs/generated.mp3', 'wb') as audio_file:
-        audio_file.write(base64.b64decode(generated_audio.split(',')[1]))
+    if side == 'left':
+        print("left")
+        extended_image.paste(image, (pixels_to_extend, 0))
+    elif side == 'right':
+        extended_image.paste(image, (0, 0))
     
-    with open('outputs/generated.jpg', 'wb') as image_file:
-        image_file.write(base64.b64decode(generated_image.split(',')[1]))
+    return extended_image
+
+def infill_spectrogram(left_image: Image.Image, right_image: Image.Image, time: int) -> Image.Image:
+    pixels_to_infill = calculate_pixels_to_extend(time)  # Converting time to pixels
+
+    width_left, height_left = left_image.size
+    width_right, height_right = right_image.size
     
-    print("Generated extended audio and image saved successfully.")
-else:
-    print(f"Error: {response.text}")
+    if height_left != height_right:
+        raise ValueError("The heights of the left and right spectrograms must be the same.")
+    
+    new_width = width_left + width_right + pixels_to_infill
+    infilled_image = Image.new('RGB', (new_width, height_left), 'white')
+    
+    infilled_image.paste(left_image, (0, 0))
+    infilled_image.paste(right_image, (width_left + pixels_to_infill, 0))
+    
+    return infilled_image
+
+def run_inference_and_save_outputs(spectrogram_image: Image.Image, prompt: str, alpha: float = 0.5, num_inference_steps: int = 50):
+    noisy_spectrogram, mask_image = gaussian_paint(spectrogram_image)
+
+    noisy_spectrogram_path_str = "outputs/noisy_spectrogram.png"
+    mask_image_path_str = "outputs/mask.png"
+    noisy_spectrogram.save(noisy_spectrogram_path_str)
+    mask_image.save(mask_image_path_str)
+
+    spectrogram_image_path = Path(noisy_spectrogram_path_str)
+    mask_image_path = Path(mask_image_path_str)
+
+    data = {
+        "start": {
+            "prompt": prompt,
+            "seed": random.randint(1, 100),
+            "denoising": 1,
+        },
+        "end": {
+            "prompt": prompt,
+            "seed": random.randint(1, 100),
+            "denoising": 1,
+        },
+        "alpha": alpha,
+        "num_inference_steps": num_inference_steps,
+        "seed_image_id": spectrogram_image_path.stem,
+        "mask_image_id": mask_image_path.stem
+    }
+
+    response = requests.post("http://127.0.0.1:3013/run_inference/", json=data)
+
+    if response.status_code == 200:
+        output = response.json()
+        generated_audio = output['audio']
+        generated_image = output['image']
+        
+        with open('outputs/generated.mp3', 'wb') as audio_file:
+            audio_file.write(base64.b64decode(generated_audio.split(',')[1]))
+        
+        with open('outputs/generated.jpg', 'wb') as image_file:
+            image_file.write(base64.b64decode(generated_image.split(',')[1]))
+        
+        print("Generated extended audio and image saved successfully.")
+    else:
+        print(f"Error: {response.text}")
+
+def riff_extend(prompt, path, time, side):
+    segment = AudioSegment.from_file(path)
+    params = SpectrogramParams()
+    converter = SpectrogramImageConverter(params=params)
+    spectrogram_image = converter.spectrogram_image_from_audio(segment)    
+    extended_spectrogram = extend_spectrogram(spectrogram_image, time, side)
+    extended_spectrogram.save(f"outputs/extended_spectrogram.png") # This holds the exteneded spectro gram
+
+    run_inference_and_save_outputs(extended_spectrogram, prompt)
+
+def riff_infill(prompt: str, left_audio: str, right_audio: str, time: int):
+    # Load audio segments
+    left_segment = AudioSegment.from_file(left_audio)
+    right_segment = AudioSegment.from_file(right_audio)
+    
+    # Convert audio to spectrogram images
+    params = SpectrogramParams()
+    converter = SpectrogramImageConverter(params=params)
+    
+    left_spectrogram = converter.spectrogram_image_from_audio(left_segment)
+    right_spectrogram = converter.spectrogram_image_from_audio(right_segment)
+    
+    # Create infilled spectrogram
+    infilled_spectrogram = infill_spectrogram(left_spectrogram, right_spectrogram, time)
+    
+    # Save infilled spectrogram
+    infilled_spectrogram.save(f"outputs/infilled_spectrogram.png") # This holds the infilled spectrogram
+    
+    # Run inference and save outputs
+    run_inference_and_save_outputs(infilled_spectrogram, prompt)
+
+"""
+Script to run these @Will
+
+# prompt, left audio, right audio, time to infill
+riff_infill("piano","sample_audios/piano.mp3","sample_audios/piano.mp3", 1)
+
+# prompt, audio path, time to extend, side of audio to extend on
+riff_extend("piano", "sample_audios/piano.mp3", 1, "right")
+"""
