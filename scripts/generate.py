@@ -14,8 +14,7 @@ from riffusion.util import image_util
 
 def generate_with_input_audio(prompt: str, randomness: str, path: str):
     # Load audio file
-    audio_path = path
-    segment = AudioSegment.from_file(audio_path)
+    segment = AudioSegment.from_file(path)
 
     # Creation of audio to spectrogram Converter
     params = SpectrogramParams()
@@ -25,7 +24,8 @@ def generate_with_input_audio(prompt: str, randomness: str, path: str):
     spectrogram_image = converter.spectrogram_image_from_audio(segment)
 
     # Save the spectrogram image for use with the RiffusionPredictor server
-    spectrogram_image_path_str = "seed_images/spectrogram.png"
+    #!!! have to manually set path to seed image
+    spectrogram_image_path_str = "/Users/willsaliba/Documents/Topics/diffusion-music/seed_images/spectrogram.png"
     spectrogram_image.save(spectrogram_image_path_str)
 
     # Convert the string path to a pathlib.Path object for JSON
@@ -35,12 +35,12 @@ def generate_with_input_audio(prompt: str, randomness: str, path: str):
         "start": {
             "prompt": prompt,
             "seed": random.randint(1, 100),
-            "denoising": randomness,
+            "denoising": float(randomness),
         },
         "end": {
             "prompt": prompt,
             "seed": random.randint(1, 100),
-            "denoising": randomness,
+            "denoising": float(randomness),
         },
         "alpha": 0.5, # Latent space interpolation of start image and end image
         "num_inference_steps": 50, # number of steps in diffusion process
@@ -48,7 +48,8 @@ def generate_with_input_audio(prompt: str, randomness: str, path: str):
     }
 
     response = requests.post("http://127.0.0.1:3013/run_inference/", json=data)
-    handle_response(response)
+    newTrackPath = handle_response(response)
+    return newTrackPath
 
 def generate_without_input_audio(prompt: str, randomness: str):
     data = {
@@ -63,7 +64,7 @@ def generate_without_input_audio(prompt: str, randomness: str):
             "denoising": float(randomness),
         },
         "alpha": 0.5,
-        "num_inference_steps": 50,
+        "num_inference_steps": 1,
     }
 
     response = requests.post("http://127.0.0.1:3013/run_inference/", json=data)
@@ -76,13 +77,12 @@ def handle_response(response, with_image=True):
         output = response.json()
         generated_audio = output['audio']
 
-        # Save generated audio in correct location
         #!!! have to manually set filepath for output track
         newTrackPath = "/Users/willsaliba/Documents/Topics/diffusion-music/outputs/generated_clip.mp3"
         with open(newTrackPath, 'wb') as audio_file:
             audio_file.write(base64.b64decode(generated_audio.split(',')[1]))
 
-        return newTrackPath
+        return "SUCCESS"
     
     else:
         print(f"Error: {response.text}")
