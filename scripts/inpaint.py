@@ -114,11 +114,12 @@ def infill_spectrogram(left_image: Image.Image, right_image: Image.Image, time: 
     
     return infilled_image
 
-def run_inference_and_save_outputs(spectrogram_image: Image, prompt: str, alpha: float = 0.5, num_inference_steps: int = 5):
+def run_inference_and_save_outputs(spectrogram_image: Image, prompt: str, alpha: float = 0.5, num_inference_steps: int = 2):
     noisy_spectrogram, mask_image = gaussian_paint(spectrogram_image)
 
-    noisy_spectrogram_path_str = "seed_images/noisy_spectrogram.png"
-    mask_image_path_str = "seed_images/mask.png"
+    #!!!have to modify filepath
+    noisy_spectrogram_path_str = "/Users/willsaliba/Documents/Topics/diffusion-music/seed_images/noisy_spectrogram.png"
+    mask_image_path_str = "/Users/willsaliba/Documents/Topics/diffusion-music/seed_images/mask.png"
     noisy_spectrogram.save(noisy_spectrogram_path_str)
     mask_image.save(mask_image_path_str)
 
@@ -149,28 +150,33 @@ def run_inference_and_save_outputs(spectrogram_image: Image, prompt: str, alpha:
         generated_audio = output['audio']
         generated_image = output['image']
         
-        with open('outputs/generated.mp3', 'wb') as audio_file:
+        #!!!have to modify filepath
+        with open('/Users/willsaliba/Documents/Topics/diffusion-music/outputs/generated_clip.mp3', 'wb') as audio_file:
             audio_file.write(base64.b64decode(generated_audio.split(',')[1]))
         
-        with open('outputs/generated.jpg', 'wb') as image_file:
+        #!!!have to modify filepath
+        with open('/Users/willsaliba/Documents/Topics/diffusion-music/outputs/generated.jpg', 'wb') as image_file:
             image_file.write(base64.b64decode(generated_image.split(',')[1]))
         
-        print("Generated extended audio and image saved successfully.")
+        print("Reached End")
+        return "SUCCESS"
     else:
         print(f"Error: {response.text}")
+        return "Fail"
 
 def riff_extend(prompt: str, path: str, time: str, side: str):
-    time = int(time)
+    time = float(time)
     segment = AudioSegment.from_file(path)
     params = SpectrogramParams()
     converter = SpectrogramImageConverter(params=params)
     spectrogram_image = converter.spectrogram_image_from_audio(segment)    
     extended_spectrogram = extend_spectrogram(spectrogram_image, time, side)
-    extended_spectrogram.save(f"outputs/extended_spectrogram.png") # This holds the exteneded spectro gram
-    run_inference_and_save_outputs(extended_spectrogram, prompt)
+    #!!!have to modify filepath
+    extended_spectrogram.save(f"/Users/willsaliba/Documents/Topics/diffusion-music/outputs/extended_spectrogram.png") # This holds the exteneded spectro gram
+    return run_inference_and_save_outputs(extended_spectrogram, prompt)
 
 def riff_infill(prompt: str, left_audio: str, right_audio: str, time: str):
-    time = int(time)
+    time = float(time)
     # Load audio segments
     left_segment = AudioSegment.from_file(left_audio)
     right_segment = AudioSegment.from_file(right_audio)
@@ -185,20 +191,11 @@ def riff_infill(prompt: str, left_audio: str, right_audio: str, time: str):
     # Create infilled spectrogram
     infilled_spectrogram = infill_spectrogram(left_spectrogram, right_spectrogram, time)
     
-    # Save infilled spectrogram
-    infilled_spectrogram.save(f"outputs/infilled_spectrogram.png") # This holds the infilled spectrogram
+    # Save infilled spectrogram !!!have to modify filepath
+    infilled_spectrogram.save(f"/Users/willsaliba/Documents/Topics/diffusion-music/outputs/infilled_spectrogram.png") # This holds the infilled spectrogram
     
     # Run inference and save outputs
-    run_inference_and_save_outputs(infilled_spectrogram, prompt)
+    return run_inference_and_save_outputs(infilled_spectrogram, prompt)
 
-riff_infill("piano","sample_audios/piano.mp3","sample_audios/piano.mp3", 1)
-
-"""
-Script to run these @Will
-
-# prompt, left audio, right audio, time to infill
-riff_infill("piano","sample_audios/piano.mp3","sample_audios/piano.mp3", 1)
-
-# prompt, audio path, time to extend, side of audio to extend on
-riff_extend("piano", "sample_audios/piano.mp3", 1, "right")
-"""
+# riff_infill("piano","sample_audios/piano.mp3","sample_audios/piano.mp3", 1)
+# riff_extend("piano","sample_audios/piano.mp3", "2", "right")
