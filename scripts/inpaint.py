@@ -114,7 +114,7 @@ def infill_spectrogram(left_image: Image.Image, right_image: Image.Image, time: 
     
     return infilled_image
 
-def run_inference_and_save_outputs(spectrogram_image: Image, prompt: str, alpha: float = 0.5, num_inference_steps: int = 2):
+def run_inference_and_save_outputs(spectrogram_image: Image, prompt: str, alpha: float = 0.5, num_inference_steps: int = 1):
     noisy_spectrogram, mask_image = gaussian_paint(spectrogram_image)
 
     #!!!have to modify filepath

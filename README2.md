@@ -39,3 +39,4 @@ open terminal and run:
     python3 riffusion/server.py
 
 then use plugin to carry out requests
+jazzy clarinet with maracas
