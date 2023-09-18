@@ -64,7 +64,7 @@ def generate_without_input_audio(prompt: str, randomness: str):
             "denoising": float(randomness),
         },
         "alpha": 0.5,
-        "num_inference_steps": 1,
+        "num_inference_steps": 50,
     }
 
     response = requests.post("http://127.0.0.1:3013/run_inference/", json=data)

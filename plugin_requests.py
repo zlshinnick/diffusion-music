@@ -20,28 +20,35 @@ path = sys.argv[4].strip('"')
 path2 = sys.argv[5].strip('"')
 time = sys.argv[6].strip('"')
 side = sys.argv[7].strip('"')
+firstStart = sys.argv[8].strip('"')
+firstEnd = sys.argv[9].strip('"')
+secStart = sys.argv[10].strip('"')
+secEnd = sys.argv[11].strip('"')
 
-newTrackPath = "Nothing Happened"
+newTrackPath = ""
 
 #calling respective action
 if action == "Generate": 
     newTrackPath = riff_generate(prompt, random)
 
 else:
-    #trim segment if needed
+    if firstStart != 0 or firstEnd != 100 :
+        pass #trim first segment
 
     if action == "Replace": newTrackPath = riff_replace(prompt, random, path)
 
     elif action == "Extend": newTrackPath = riff_extend(prompt, path, time, side)
 
-    elif action == "Fill": newTrackPath = riff_infill(prompt, path, path2, time)
+    elif action == "Fill": 
+        if secStart != 0 or secEnd != 100 :
+            pass #trim second segment
+        newTrackPath = riff_infill(prompt, path, path2, time)
 
 #reset teriminal
 sys.stdout = original_stdout
 
 #print result so plugin can capture it
 if newTrackPath == "":
-    print("Reached End But Failed")
+    print("reached end but failed")
 else:
     print(newTrackPath)
-
