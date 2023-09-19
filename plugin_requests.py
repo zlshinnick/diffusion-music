@@ -43,21 +43,22 @@ else:
         startDurationToCut = (len(firstSegment) * (int(firstStart) / 100))
         endDurationToCut = (len(firstSegment) * ((100 - int(firstEnd)) / 100))
         trimmed_firstSegment = firstSegment[startDurationToCut:(len(firstSegment) - endDurationToCut)]
-        # Save trimmed segment to updated path
+        #save trimmed segment to updated path
         path = os.path.join(path_to_curr_dir, f"outputs/firstSegment.{path1_extension}")
         trimmed_firstSegment.export(path, format=path1_extension)
 
-    if action == "Replace": pass#newTrackPath = riff_replace(prompt, random, path)
+    if action == "Replace": newTrackPath = riff_replace(prompt, random, path)
 
-    elif action == "Extend": pass#newTrackPath = riff_extend(prompt, path, time, side)
+    elif action == "Extend": newTrackPath = riff_extend(prompt, path, time, side)
 
     elif action == "Fill": 
+        #trimming second input segment if needed
         if secStart != 0 or secEnd != 100 :
             secSegment = AudioSegment.from_file(path)
             startDurationToCut = (len(secSegment) * (int(secStart) / 100))
             endDurationToCut = (len(secSegment) * ((100 - int(secEnd)) / 100))
             trimmed_secSegment = secSegment[startDurationToCut:(len(secSegment) - endDurationToCut)]
-            # Save trimmed segment to updated path
+            #save trimmed segment to updated path
             path2 = os.path.join(path_to_curr_dir, f"outputs/secSegment.{path2_extension}")
             trimmed_secSegment.export(path2, format=path2_extension)
 
