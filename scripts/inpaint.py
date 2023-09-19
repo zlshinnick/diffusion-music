@@ -16,6 +16,9 @@ from riffusion.util import image_util
 import numpy as np
 from PIL import Image
 
+#need to update this to be able to use model
+path_to_curr_dir = "/Users/willsaliba/Documents/Topics/diffusion-music"
+
 def gaussian_paint(image: Image.Image, fade_width: int = 50) -> (Image.Image, Image.Image):
     """
     Fill all the gaps in the spectrogram with Gaussian noise and create a mask.
@@ -117,9 +120,8 @@ def infill_spectrogram(left_image: Image.Image, right_image: Image.Image, time: 
 def run_inference_and_save_outputs(spectrogram_image: Image, prompt: str, alpha: float = 0.5, num_inference_steps: int = 1):
     noisy_spectrogram, mask_image = gaussian_paint(spectrogram_image)
 
-    #!!!have to modify filepath
-    noisy_spectrogram_path_str = "/Users/willsaliba/Documents/Topics/diffusion-music/seed_images/noisy_spectrogram.png"
-    mask_image_path_str = "/Users/willsaliba/Documents/Topics/diffusion-music/seed_images/mask.png"
+    noisy_spectrogram_path_str = path_to_curr_dir + "/seed_images/noisy_spectrogram.png"
+    mask_image_path_str = path_to_curr_dir + "/seed_images/mask.png"
     noisy_spectrogram.save(noisy_spectrogram_path_str)
     mask_image.save(mask_image_path_str)
 
@@ -150,12 +152,10 @@ def run_inference_and_save_outputs(spectrogram_image: Image, prompt: str, alpha:
         generated_audio = output['audio']
         generated_image = output['image']
         
-        #!!!have to modify filepath
-        with open('/Users/willsaliba/Documents/Topics/diffusion-music/outputs/generated_clip.mp3', 'wb') as audio_file:
+        with open(path_to_curr_dir + '/outputs/generated_clip.mp3', 'wb') as audio_file:
             audio_file.write(base64.b64decode(generated_audio.split(',')[1]))
         
-        #!!!have to modify filepath
-        with open('/Users/willsaliba/Documents/Topics/diffusion-music/outputs/generated.jpg', 'wb') as image_file:
+        with open(path_to_curr_dir + '/outputs/generated.jpg', 'wb') as image_file:
             image_file.write(base64.b64decode(generated_image.split(',')[1]))
         
         print("Reached End")
@@ -171,8 +171,7 @@ def riff_extend(prompt: str, path: str, time: str, side: str):
     converter = SpectrogramImageConverter(params=params)
     spectrogram_image = converter.spectrogram_image_from_audio(segment)    
     extended_spectrogram = extend_spectrogram(spectrogram_image, time, side)
-    #!!!have to modify filepath
-    extended_spectrogram.save(f"/Users/willsaliba/Documents/Topics/diffusion-music/outputs/extended_spectrogram.png") # This holds the exteneded spectro gram
+    extended_spectrogram.save(path_to_curr_dir + "/outputs/extended_spectrogram.png") # This holds the exteneded spectro gram 
     return run_inference_and_save_outputs(extended_spectrogram, prompt)
 
 def riff_infill(prompt: str, left_audio: str, right_audio: str, time: str):
@@ -191,8 +190,8 @@ def riff_infill(prompt: str, left_audio: str, right_audio: str, time: str):
     # Create infilled spectrogram
     infilled_spectrogram = infill_spectrogram(left_spectrogram, right_spectrogram, time)
     
-    # Save infilled spectrogram !!!have to modify filepath
-    infilled_spectrogram.save(f"/Users/willsaliba/Documents/Topics/diffusion-music/outputs/infilled_spectrogram.png") # This holds the infilled spectrogram
+    # Save infilled spectrogram 
+    infilled_spectrogram.save(path_to_curr_dir + "/outputs/infilled_spectrogram.png") # This holds the infilled spectrogram
     
     # Run inference and save outputs
     return run_inference_and_save_outputs(infilled_spectrogram, prompt)

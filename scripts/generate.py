@@ -12,6 +12,9 @@ from riffusion.spectrogram_params import SpectrogramParams
 from riffusion.spectrogram_image_converter import SpectrogramImageConverter
 from riffusion.util import image_util
 
+#need to update this to be able to use model
+path_to_curr_dir = "/Users/willsaliba/Documents/Topics/diffusion-music"
+
 def generate_with_input_audio(prompt: str, randomness: str, path: str):
     # Load audio file
     segment = AudioSegment.from_file(path)
@@ -25,7 +28,7 @@ def generate_with_input_audio(prompt: str, randomness: str, path: str):
 
     # Save the spectrogram image for use with the RiffusionPredictor server
     #!!! have to manually set path to seed image
-    spectrogram_image_path_str = "/Users/willsaliba/Documents/Topics/diffusion-music/seed_images/spectrogram.png"
+    spectrogram_image_path_str = path_to_curr_dir + "/seed_images/spectrogram.png"
     spectrogram_image.save(spectrogram_image_path_str)
 
     # Convert the string path to a pathlib.Path object for JSON
@@ -43,7 +46,7 @@ def generate_with_input_audio(prompt: str, randomness: str, path: str):
             "denoising": float(randomness),
         },
         "alpha": 0.5, # Latent space interpolation of start image and end image
-        "num_inference_steps": 50, # number of steps in diffusion process
+        "num_inference_steps": 1, # number of steps in diffusion process
         "seed_image_id": spectrogram_image_path.stem
     }
 
@@ -64,7 +67,7 @@ def generate_without_input_audio(prompt: str, randomness: str):
             "denoising": float(randomness),
         },
         "alpha": 0.5,
-        "num_inference_steps": 50,
+        "num_inference_steps": 1,
     }
 
     response = requests.post("http://127.0.0.1:3013/run_inference/", json=data)
@@ -77,8 +80,7 @@ def handle_response(response, with_image=True):
         output = response.json()
         generated_audio = output['audio']
 
-        #!!! have to manually set filepath for output track
-        newTrackPath = "/Users/willsaliba/Documents/Topics/diffusion-music/outputs/generated_clip.mp3"
+        newTrackPath = path_to_curr_dir + "/outputs/generated_clip.mp3"
         with open(newTrackPath, 'wb') as audio_file:
             audio_file.write(base64.b64decode(generated_audio.split(',')[1]))
 
