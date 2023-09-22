@@ -46,7 +46,7 @@ def generate_with_input_audio(prompt: str, randomness: str, path: str):
             "denoising": float(randomness),
         },
         "alpha": 0.5, # Latent space interpolation of start image and end image
-        "num_inference_steps": 1, # number of steps in diffusion process
+        "num_inference_steps": 50, # number of steps in diffusion process (should be 50 in production)
         "seed_image_id": spectrogram_image_path.stem
     }
 
@@ -67,7 +67,7 @@ def generate_without_input_audio(prompt: str, randomness: str):
             "denoising": float(randomness),
         },
         "alpha": 0.5,
-        "num_inference_steps": 1,
+        "num_inference_steps": 50, #should be 50 in production
     }
 
     response = requests.post("http://127.0.0.1:3013/run_inference/", json=data)
